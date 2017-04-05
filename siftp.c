@@ -128,10 +128,6 @@
 				strncpy(a_result, ap_msg->m_verb, SIFTP_VERB_SIZE);
 				strncpy(&a_result[SIFTP_VERB_SIZE], ap_msg->m_param, SIFTP_PARAMETER_SIZE);
 				
-				#ifndef NODEBUG
-					printf("serialize(): result='%s'\n", a_result);
-				#endif
-				
 			return true;
 		}
 		
@@ -146,10 +142,6 @@
 			// parse serialized string
 				strncpy(ap_result->m_verb, a_str, SIFTP_VERB_SIZE);
 				strncpy(ap_result->m_param, &a_str[SIFTP_VERB_SIZE], SIFTP_PARAMETER_SIZE);
-				
-				#ifndef NODEBUG
-					printf("deserialize(): message {verb='%s',param='%s'}\n", ap_result->m_verb, ap_result->m_param);
-				#endif
 				
 			return true;
 		}
@@ -177,10 +169,7 @@
 				}
 				
 				total += n;
-				
-				#ifndef NODEBUG
-					printf("siftp_send(): bytes sent=%d, remaining=%d\n", total, SIFTP_MESSAGE_SIZE - total);
-				#endif
+
 			}
 			
 			return true;
@@ -202,11 +191,7 @@
 				}
 				
 				total += n;
-				
-				#ifndef NODEBUG
-					printf("siftp_recv(): bytes recv=%d, remaining=%d\n", total, SIFTP_MESSAGE_SIZE - total);
-					printf("siftp_recv(): buffer='%s'\n", buf);
-				#endif
+
 			}
 			
 			return siftp_deserialize(buf, ap_response);
@@ -220,10 +205,6 @@
 				
 			// init vars
 				memset(&msgOut, 0, sizeof(msgOut));
-			
-			#ifndef NODEBUG
-				printf("siftp_sendData(): data length = %d\n", a_length);
-			#endif
 				
 			// header
 				Message_setType(&msgOut, SIFTP_VERBS_DATA_STREAM_HEADER);
@@ -272,9 +253,6 @@
 					// allocate space
 						sscanf(msgIn.m_param, SIFTP_VERBS_DATA_STREAM_HEADER_LENFMT, ap_length);
 						
-						#ifndef NODEBUG
-							printf("siftp_recvData(): data length = %d\n", *ap_length);
-						#endif
 						
 						if((buf = calloc(*ap_length+1, sizeof(char))) == NULL) // +1 for null term
 						{
@@ -299,10 +277,6 @@
 									free(buf);
 									return NULL;
 								}
-								
-								#ifndef NODEBUG
-									printf("siftp_recvData(): got Message from stream.\n");
-								#endif
 							
 							// store data
 								if(Message_hasType(&msgIn, SIFTP_VERBS_DATA_STREAM_PAYLOAD))

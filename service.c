@@ -18,9 +18,6 @@
 
 Boolean session_destroy(const int a_socket)
 {
-	#ifndef NODEBUG
-		printf("session_destroy(): closing session.");
-	#endif
 	
 	// variables
 		Message msgOut;
@@ -66,9 +63,6 @@ Boolean service_getAbsolutePath(const String a_basePath, const String a_extensio
 		
 		realpath(tempPath, a_result);
 		
-		#ifndef NODEBUG
-			printf("service_getAbsolutePath(): before='%s', after='%s'\n", tempPath, a_result);
-		#endif
 	
 	return true;
 }
@@ -120,11 +114,6 @@ String* service_parseArgs(const String a_cmdStr, int *ap_argc)
 		}
 		
 		*ap_argc = i;
-		
-		#ifndef NODEBUG
-			for(i = 0; i<*ap_argc; i++)
-				printf("parseArgs(): argv[%d]='%s', addr=%p\n", i, p_args[i], p_args[i]);
-		#endif
 		
 	// clean up
 		free(buf);
@@ -258,10 +247,6 @@ String service_readDir(const String a_path, int *ap_length)
 		{
 			j += strlen(p_dirInfo->d_name);
 			
-			#ifndef NODEBUG
-				printf("service_readDir(): file='%s', i=%d, j=%d\n", p_dirInfo->d_name, i, j);
-			#endif
-			
 			// expand buffer
 				if((buf = realloc(buf, (j+1) * sizeof(char))) == NULL) // +1 for newline
 				{
@@ -294,10 +279,6 @@ Boolean service_writeFile(const String a_path, const String a_data, const int a_
 		if(fwrite(a_data, sizeof(char), a_length, p_fileFd) != -1)
 		{
 			result = true;
-			
-			#ifndef NODEBUG
-				printf("writeFile(): wrote file='%s', length=%d, &data=%p, data='%s'.\n", a_path, a_length, a_data, a_data);
-			#endif
 		}
 		else
 			perror("service_writeFile()");

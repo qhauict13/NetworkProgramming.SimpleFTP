@@ -69,16 +69,7 @@ int main(int a_argc, char **ap_argv) {
         clientAddrSize = sizeof(clientAddr);
 
         // wait for a client
-
-#ifndef NODEBUG
-        printf("\nmain(): waiting for clients...\n");
-#endif
-
         if ((clientSocket = accept(serverSocket, (struct sockaddr *) &clientAddr, &clientAddrSize)) != -1) {
-#ifndef NODEBUG
-            printf("\nmain(): got client connection [addr=%s,port=%d]\n", inet_ntoa(clientAddr.sin_addr),
-                   ntohs(clientAddr.sin_port));
-#endif
 
             // dispatch job
             if ((childPID = fork()) == 0) // child code
@@ -95,11 +86,6 @@ int main(int a_argc, char **ap_argv) {
                 close(clientSocket);
                 return 0;
             }
-
-#ifndef NODEBUG
-            printf("\nmain(): forked a child; pid=%d\n", childPID);
-#endif
-
             close(clientSocket); // parent doesn't need this socket
         } else
             perror("main()");
@@ -202,11 +188,6 @@ Boolean session_create(const int a_socket) {
         return false;
     }
 
-    // session now established
-#ifndef NODEBUG
-    printf("session_create(): success\n");
-#endif
-
     return true;
 }
 
@@ -226,10 +207,6 @@ void service_loop(const int a_socket) {
             break;
 
         else {
-#ifndef NODEBUG
-            printf("service_loop(): got command '%s'\n", Message_getValue(&msg));
-#endif
-
             // parse request
             if ((p_argv = service_parseArgs(Message_getValue(&msg), &argc)) == NULL || argc <= 0) {
                 service_freeArgs(p_argv, argc);
@@ -284,9 +261,6 @@ Boolean service_handleCmd(const int a_socket, const String *ap_argv, const int a
             if (service_sendStatus(a_socket, true))
                 tempStatus = siftp_sendData(a_socket, dataBuf, dataBufLen);
 
-#ifndef NODEBUG
-            printf("ls(): status=%d\n", tempStatus);
-#endif
 
             // clean up
             free(dataBuf);
@@ -310,33 +284,11 @@ Boolean service_handleCmd(const int a_socket, const String *ap_argv, const int a
                     if (service_sendStatus(a_socket, true)) {
                         // send file
                         tempStatus = siftp_sendData(a_socket, dataBuf, dataBufLen);
-
-#ifndef NODEBUG
-                        printf("get(): file sent %s.\n", tempStatus ? "OK" : "FAILED");
-#endif
                     }
-#ifndef NODEBUG
-                    else
-                        printf("get(): remote host didn't get status ACK.\n");
-#endif
-
                     free(dataBuf);
                 }
-#ifndef NODEBUG
-                else
-                    printf("get(): file reading failed.\n");
-#endif
             }
-#ifndef NODEBUG
-            else
-                printf("get(): don't have read permissions.\n");
-#endif
         }
-#ifndef NODEBUG
-        else
-            printf("get(): absolute path determining failed.\n");
-#endif
-
         return tempStatus;
     } else if (strcmp(ap_argv[0], "put") == 0 && a_argc > 1) {
         char dstPath[PATH_MAX + 1];
@@ -349,43 +301,20 @@ Boolean service_handleCmd(const int a_socket, const String *ap_argv, const int a
                 if (service_sendStatus(a_socket, true)) {
                     // receive file
                     if ((dataBuf = siftp_recvData(a_socket, &dataBufLen)) != NULL) {
-#ifndef NODEBUG
-                        printf("put(): about to write to file '%s'.\n", dstPath);
-#endif
 
                         tempStatus = service_writeFile(dstPath, dataBuf, dataBufLen);
 
                         free(dataBuf);
 
-#ifndef NODEBUG
-                        printf("put(): file writing %s.\n", tempStatus ? "OK" : "FAILED");
-#endif
 
                         // send secondary ack: file was written OK
                         if (tempStatus) {
                             return service_sendStatus(a_socket, true);
                         }
                     }
-#ifndef NODEBUG
-                    else
-                        printf("put(): getting of remote file failed.\n");
-#endif
                 }
-#ifndef NODEBUG
-                else
-                    printf("put(): remote host didn't get status ACK.\n");
-#endif
             }
-#ifndef NODEBUG
-            else
-                printf("put(): don't have write permissions.\n");
-#endif
         }
-#ifndef NODEBUG
-        else
-            printf("put(): absolute path determining failed.\n");
-#endif
     }
-
     return false;
 }

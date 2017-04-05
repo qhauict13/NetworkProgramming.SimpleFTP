@@ -13,7 +13,7 @@
 	/* constants */
 	
 		#define SERVER_SOCKET_BACKLOG	5
-		#define SERVER_PASSWORD	"ce150"
+		#define SERVER_PASSWORD	"ict58"
 	
 	/* services */
 	
