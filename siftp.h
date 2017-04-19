@@ -30,7 +30,6 @@
 			#define SIFTP_VERBS_ACCEPTED	"ACPT"
 			#define SIFTP_VERBS_DENIED	"DENY"
 			
-			#define SIFTP_VERBS_PROCEED	"PRCD"
 			#define SIFTP_VERBS_ABORT	"ABRT"
 			
 			#define SIFTP_VERBS_COMMAND	"CMND"
@@ -40,8 +39,6 @@
 			#define SIFTP_VERBS_DATA_STREAM_HEADER_LENFMT	"%d"
 			#define SIFTP_VERBS_DATA_STREAM_PAYLOAD	"DSTP"
 			#define SIFTP_VERBS_DATA_STREAM_TAILER	"DSTT"
-		
-			#define SIFTP_FLAG	0x10
 			
 		// sizes in bytes
 			#define SIFTP_MESSAGE_SIZE	( 1 << 10 )
