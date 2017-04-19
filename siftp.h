@@ -30,7 +30,6 @@
 			#define SIFTP_VERBS_ACCEPTED	"ACPT"
 			#define SIFTP_VERBS_DENIED	"DENY"
 			
-			#define SIFTP_VERBS_PROCEED	"PRCD"
 			#define SIFTP_VERBS_ABORT	"ABRT"
 			
 			#define SIFTP_VERBS_COMMAND	"CMND"
@@ -40,8 +39,6 @@
 			#define SIFTP_VERBS_DATA_STREAM_HEADER_LENFMT	"%d"
 			#define SIFTP_VERBS_DATA_STREAM_PAYLOAD	"DSTP"
 			#define SIFTP_VERBS_DATA_STREAM_TAILER	"DSTT"
-		
-			#define SIFTP_FLAG	0x10
 			
 		// sizes in bytes
 			#define SIFTP_MESSAGE_SIZE	( 1 << 10 )
@@ -131,20 +128,6 @@
 		
 		
 	/* services */
-	
-		/**
-		 * Escapes the SimpleFTP flags in the given string.
-		 * @note	returns a dynamically allocated object.
-		 * @deprecated	using fixed length messages instead.
-		 */
-		String siftp_escape(const String a_str);
-		
-		/**
-		 * Unescapes SimpleFTP flags in the payload.
-		 * @note	returns a dynamically allocated object.
-		 * @deprecated	using fixed length messages instead.
-		 */
-		String siftp_unescape(const String a_str);
 		
 		/**
 		 * Serializes a Message object for network transport.
