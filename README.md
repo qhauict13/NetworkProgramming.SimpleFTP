@@ -2,7 +2,7 @@
 
 ## Usage
 1. `./siftpd [folder] [port]` to create a server with defined port. This might require permissions, give it.
-2. `./siftp [port]` establish a connection to server. default password `ict58`
+2. `./siftp [port]` establish a connection to server. default username and password `ict58`
 
 ## List commands
 1. `ls` displays contents of remote current working directory.
