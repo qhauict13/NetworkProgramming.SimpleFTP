@@ -129,11 +129,11 @@ Boolean session_create(const int a_socket)
 		// server: accept|deny
 			Message_setType(&msgOut, SIFTP_VERBS_USERNAME);
 			
-			// get user input
-				//printf("\nusername: ");
+			//get user input
+			printf("\nusername: ");
 				
-				// XXX prohibited by this project
-				//scanf("%s", msgOut.m_param);
+				//XXX prohibited by this project
+			scanf("%s", msgOut.m_param);
 			
 			if(!service_query(a_socket, &msgOut, &msgIn) || !Message_hasType(&msgIn, SIFTP_VERBS_ACCEPTED))
 			{

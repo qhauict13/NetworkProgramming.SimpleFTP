@@ -14,6 +14,7 @@
 	
 		#define SERVER_SOCKET_BACKLOG	5
 		#define SERVER_PASSWORD	"ict58"
+		#define SERVER_USERNAME "ict58"
 	
 	/* services */
 	

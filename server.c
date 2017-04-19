@@ -169,8 +169,17 @@ Boolean session_create(const int a_socket) {
 
     // server: accept|deny
     // client: password
-    Message_setType(&msgOut, SIFTP_VERBS_ACCEPTED); //XXX check username... not required for this project
+    //Message_setType(&msgOut, SIFTP_VERBS_ACCEPTED); //XXX check username... not required for this project
+    if (Message_hasValue(&msgIn, SERVER_USERNAME)) {
+        Message_setType(&msgOut, SIFTP_VERBS_ACCEPTED);
+        siftp_send(a_socket, &msgOut);
+    } else {
+        Message_setType(&msgOut, SIFTP_VERBS_DENIED);
+        siftp_send(a_socket, &msgOut);
 
+        fprintf(stderr, "service_create(): client username rejected.\n");
+        return false;
+    }
     if (!service_query(a_socket, &msgOut, &msgIn) || !Message_hasType(&msgIn, SIFTP_VERBS_PASSWORD)) {
         fprintf(stderr, "service_create(): password not specified by client.\n");
         return false;
