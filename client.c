@@ -190,6 +190,7 @@ void service_loop(const int a_socket) {
 
         if (strcmp(buf, "exit") == 0) {
             isLooping = false;
+
         } else if (strcmp(buf, "help") == 0) {
             printf("\nls\n  displays contents of remote current working directory.\n");
             printf("\nlls\n  displays contents of local current working directory.\n");

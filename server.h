@@ -15,6 +15,7 @@
 		#define SERVER_SOCKET_BACKLOG	5
         #define SERVER_USERNAME "root"
 		#define SERVER_PASSWORD	"ict58"
+		#define ARRAY_MAX 100
 	
 	/* services */
 	

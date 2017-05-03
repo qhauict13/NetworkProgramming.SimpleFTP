@@ -16,7 +16,7 @@ TARGETS=siftp siftpd
 all: $(TARGETS)
 
 siftpd: $(DEPS) server.o
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ `mysql_config --cflags --libs`
 
 siftp: $(DEPS) client.o
 	$(CC) $(CFLAGS) -o $@ $^

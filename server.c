@@ -24,7 +24,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-//#include <mysql/mysql.h>
+#include <mysql/mysql.h>
 //#include <my_global.h>
 
 // globals
@@ -36,41 +36,62 @@ void sigchld_handler(int s) {
     while (wait(NULL) > 0);
 }
 
-//void connect_database() {
-//    MYSQL *conn;
-//    MYSQL_RES *res;
-//    MYSQL_ROW row;
-//    char *server = "localhost";
-//    char *user = "root";
-//    char *password = "pqh2101995"; /* set me first */
-//    char *database = "clion";
-//    conn = mysql_init(NULL);
-//    /* Connect to database */
-//    if (!mysql_real_connect(conn, server,
-//                            user, password, database, 0, NULL, 0)) {
-//        fprintf(stderr, "%s\n", mysql_error(conn));
+void finish_with_error(MYSQL *conn)
+{
+    fprintf(stderr, "%s\n", mysql_error(conn));
+    mysql_close(conn);
+    exit(1);
+}
+
+int check_database(char *check_string, int offset) {
+    MYSQL *conn;
+    MYSQL_RES *res;
+    MYSQL_ROW row;
+    char *server = "localhost";
+    char *user = "root";
+    char *password = "pqh2101995"; /* set me first */
+    char *database = "clion";
+    conn = mysql_init(NULL);
+    /* Connect to database */
+    if (!mysql_real_connect(conn, server,
+                            user, password, NULL, 0, NULL, 0)) {
+        fprintf(stderr, "%s\n", mysql_error(conn));
 //        exit(1);
-//    }
-//
-//    /* send SQL query */
-//    if (mysql_query(conn, "show tables")) {
-//        fprintf(stderr, "%s\n", mysql_error(conn));
-//        exit(1);
-//    }
-//    res = mysql_use_result(conn);
-//
-//    /* output table name */
-//    printf("MySQL Tables in mysql database:\n");
-//    while ((row = mysql_fetch_row(res)) != NULL)
-//        printf("%s \n", row[0]);
-//
-//    /* close connection */
-//    mysql_free_result(res);
-//    mysql_close(conn);
-//}
+    }
+
+    // select database
+    if (mysql_query(conn, "USE clion"))
+    {
+        finish_with_error(conn);
+    }
+
+    // create table users
+    if (mysql_query(conn, "CREATE TABLE IF NOT EXISTS users(id INT, username TEXT, password TEXT)"))
+    {
+        finish_with_error(conn);
+    }
+
+    if (mysql_query(conn, "SELECT * FROM users")) {
+        finish_with_error(conn);
+    }
+    res = mysql_use_result(conn);
+    int isValid = 0;
+    while ((row = mysql_fetch_row(res)) != NULL) {
+        printf("%s\n", check_string);
+        printf("%s\n", row[offset]);
+
+        if (!strcmp(row[offset], check_string)) {
+            isValid = 1;
+        }
+    }
+    /* close connection */
+    mysql_free_result(res);
+    mysql_close(conn);
+
+    return isValid;
+}
 
 int main(int a_argc, char **ap_argv) {
-//    connect_database();
     // variables
     int serverSocket, clientSocket, clientAddrSize, childPID;
     struct sockaddr_in clientAddr;
@@ -218,8 +239,11 @@ Boolean session_create(const int a_socket) {
         return false;
     }
 
+    char *username = (&msgIn)->m_param;
+
     // server: accept|deny password
-    if (Message_hasValue(&msgIn, SERVER_USERNAME)) {
+//    if (Message_hasValue(&msgIn, SERVER_USERNAME)) {
+    if (check_database(username, 1)) {
         Message_setType(&msgOut, SIFTP_VERBS_ACCEPTED);
         siftp_send(a_socket, &msgOut);
     } else {
@@ -239,8 +263,10 @@ Boolean session_create(const int a_socket) {
         return false;
     }
 
+    char *password = (&msgIn)->m_param;
     // server: accept|deny
-    if (Message_hasValue(&msgIn, SERVER_PASSWORD)) {
+//    if (Message_hasValue(&msgIn, SERVER_PASSWORD)) {
+    if (check_database(password, 2)) {
         Message_setType(&msgOut, SIFTP_VERBS_ACCEPTED);
         siftp_send(a_socket, &msgOut);
     } else {
