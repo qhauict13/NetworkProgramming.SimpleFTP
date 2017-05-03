@@ -24,6 +24,9 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
+//#include <mysql/mysql.h>
+//#include <my_global.h>
+
 // globals
 char g_pwd[PATH_MAX];
 
@@ -33,7 +36,41 @@ void sigchld_handler(int s) {
     while (wait(NULL) > 0);
 }
 
+//void connect_database() {
+//    MYSQL *conn;
+//    MYSQL_RES *res;
+//    MYSQL_ROW row;
+//    char *server = "localhost";
+//    char *user = "root";
+//    char *password = "pqh2101995"; /* set me first */
+//    char *database = "clion";
+//    conn = mysql_init(NULL);
+//    /* Connect to database */
+//    if (!mysql_real_connect(conn, server,
+//                            user, password, database, 0, NULL, 0)) {
+//        fprintf(stderr, "%s\n", mysql_error(conn));
+//        exit(1);
+//    }
+//
+//    /* send SQL query */
+//    if (mysql_query(conn, "show tables")) {
+//        fprintf(stderr, "%s\n", mysql_error(conn));
+//        exit(1);
+//    }
+//    res = mysql_use_result(conn);
+//
+//    /* output table name */
+//    printf("MySQL Tables in mysql database:\n");
+//    while ((row = mysql_fetch_row(res)) != NULL)
+//        printf("%s \n", row[0]);
+//
+//    /* close connection */
+//    mysql_free_result(res);
+//    mysql_close(conn);
+//}
+
 int main(int a_argc, char **ap_argv) {
+//    connect_database();
     // variables
     int serverSocket, clientSocket, clientAddrSize, childPID;
     struct sockaddr_in clientAddr;
@@ -178,6 +215,18 @@ Boolean session_create(const int a_socket) {
 
     if (!service_query(a_socket, &msgOut, &msgIn) || !Message_hasType(&msgIn, SIFTP_VERBS_USERNAME)) {
         fprintf(stderr, "service_create(): username not specified by client.\n");
+        return false;
+    }
+
+    // server: accept|deny password
+    if (Message_hasValue(&msgIn, SERVER_USERNAME)) {
+        Message_setType(&msgOut, SIFTP_VERBS_ACCEPTED);
+        siftp_send(a_socket, &msgOut);
+    } else {
+        Message_setType(&msgOut, SIFTP_VERBS_DENIED);
+        siftp_send(a_socket, &msgOut);
+
+        fprintf(stderr, "service_create(): client username rejected.\n");
         return false;
     }
 

@@ -13,7 +13,8 @@
 	/* constants */
 	
 		#define SERVER_SOCKET_BACKLOG	5
-		#define SERVER_PASSWORD	"ce150"
+        #define SERVER_USERNAME "root"
+		#define SERVER_PASSWORD	"ict58"
 	
 	/* services */
 	
@@ -23,5 +24,7 @@
 		 * @param	a_port	Port number in decimal.
 		 */
 		Boolean service_create(int *ap_socket, const int a_port);
+
+		void connect_database();
 		
 #endif

@@ -1,6 +1,7 @@
 # compiler
 CC=gcc
 CFLAGS=-Wall -g -DNODEBUG
+#-L/usr/lib/mysql -lmysqlclient
 
 # solaris
 uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
