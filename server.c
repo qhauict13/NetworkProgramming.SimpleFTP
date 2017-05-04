@@ -47,16 +47,21 @@ int check_database(char *check_string, int offset) {
     MYSQL *conn;
     MYSQL_RES *res;
     MYSQL_ROW row;
-    char *server = "localhost";
-    char *user = "root";
-    char *password = "pqh2101995"; /* set me first */
-    char *database = "clion";
+    char *server = DATABASE_SERVER;
+    char *user = DATABASE_USER;
+    char *password = DATABASE_PASSWORD; /* set me first */
+
     conn = mysql_init(NULL);
     /* Connect to database */
     if (!mysql_real_connect(conn, server,
                             user, password, NULL, 0, NULL, 0)) {
-        fprintf(stderr, "%s\n", mysql_error(conn));
-//        exit(1);
+        finish_with_error(conn);
+    }
+
+    // create database
+    if (mysql_query(conn, "CREATE DATABASE IF NOT EXISTS clion"))
+    {
+        finish_with_error(conn);
     }
 
     // select database
@@ -68,12 +73,13 @@ int check_database(char *check_string, int offset) {
     // create table users
     if (mysql_query(conn, "CREATE TABLE IF NOT EXISTS users(id INT, username TEXT, password TEXT)"))
     {
-        finish_with_error(conn);
+        finish_with_error(conn);     
     }
 
     if (mysql_query(conn, "SELECT * FROM users")) {
         finish_with_error(conn);
     }
+    
     res = mysql_use_result(conn);
     int isValid = 0;
     while ((row = mysql_fetch_row(res)) != NULL) {

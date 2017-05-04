@@ -15,6 +15,9 @@
 		#define SERVER_SOCKET_BACKLOG	5
         #define SERVER_USERNAME "root"
 		#define SERVER_PASSWORD	"ict58"
+		#define DATABASE_SERVER "localhost"
+		#define DATABASE_USER "root"
+		#define DATABASE_PASSWORD NULL
 		#define ARRAY_MAX 100
 	
 	/* services */
@@ -24,8 +27,5 @@
 		 * @param	ap_socket	Storage for socket descriptor.
 		 * @param	a_port	Port number in decimal.
 		 */
-		Boolean service_create(int *ap_socket, const int a_port);
-
-		void connect_database();
-		
+		Boolean service_create(int *ap_socket, const int a_port);		
 #endif
