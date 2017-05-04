@@ -71,7 +71,7 @@ int check_database(char *check_string, int offset) {
     }
 
     // create table users
-    if (mysql_query(conn, "CREATE TABLE IF NOT EXISTS users(id INT, username TEXT, password TEXT)"))
+    if (mysql_query(conn, "CREATE TABLE IF NOT EXISTS users(id INT NOT NULL AUTO_INCREMENT, username TEXT, password TEXT, PRIMARY KEY (id))"))
     {
         finish_with_error(conn);     
     }
