@@ -83,8 +83,8 @@ int check_database(char *check_string, int offset) {
     res = mysql_use_result(conn);
     int isValid = 0;
     while ((row = mysql_fetch_row(res)) != NULL) {
-        printf("%s\n", check_string);
-        printf("%s\n", row[offset]);
+        // printf("%s\n", check_string);
+        // printf("%s\n", row[offset]);
 
         if (!strcmp(row[offset], check_string)) {
             isValid = 1;
@@ -251,7 +251,7 @@ Boolean session_create(const int a_socket) {
 //    if (Message_hasValue(&msgIn, SERVER_USERNAME)) {
     if (check_database(username, 1)) {
         Message_setType(&msgOut, SIFTP_VERBS_ACCEPTED);
-        siftp_send(a_socket, &msgOut);
+        // siftp_send(a_socket, &msgOut);
     } else {
         Message_setType(&msgOut, SIFTP_VERBS_DENIED);
         siftp_send(a_socket, &msgOut);
