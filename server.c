@@ -43,11 +43,10 @@ void finish_with_error(MYSQL *conn)
     exit(1);
 }
 
-int check_database(char *check_string, int offset) {
+MYSQL_ROW check_database(char *check_string, int offset) {
     MYSQL *conn;
     MYSQL_RES *res;
     MYSQL_ROW row;
-
     conn = mysql_init(NULL);
     /* Connect to database */
     if (!mysql_real_connect(conn, DATABASE_SERVER,
@@ -78,20 +77,19 @@ int check_database(char *check_string, int offset) {
     }
     
     res = mysql_use_result(conn);
-    int isValid = 0;
     while ((row = mysql_fetch_row(res)) != NULL) {
         // printf("%s\n", check_string);
         // printf("%s\n", row[offset]);
 
         if (!strcmp(row[offset], check_string)) {
-            isValid = 1;
+            return row;
         }
     }
     /* close connection */
     mysql_free_result(res);
     mysql_close(conn);
 
-    return isValid;
+    return NULL;
 }
 
 int main(int a_argc, char **ap_argv) {
@@ -246,7 +244,9 @@ Boolean session_create(const int a_socket) {
 
     // server: accept|deny password
 //    if (Message_hasValue(&msgIn, SERVER_USERNAME)) {
-    if (check_database(username, 1)) {
+    MYSQL_ROW row = check_database(username, 1);
+
+    if (row != NULL) {
         Message_setType(&msgOut, SIFTP_VERBS_ACCEPTED);
         // siftp_send(a_socket, &msgOut);
     } else {
@@ -269,7 +269,7 @@ Boolean session_create(const int a_socket) {
     char *password = (&msgIn)->m_param;
     // server: accept|deny
 //    if (Message_hasValue(&msgIn, SERVER_PASSWORD)) {
-    if (check_database(password, 2)) {
+    if (!strcmp(password, row[2])) {
         Message_setType(&msgOut, SIFTP_VERBS_ACCEPTED);
         siftp_send(a_socket, &msgOut);
     } else {
