@@ -47,14 +47,11 @@ int check_database(char *check_string, int offset) {
     MYSQL *conn;
     MYSQL_RES *res;
     MYSQL_ROW row;
-    char *server = DATABASE_SERVER;
-    char *user = DATABASE_USER;
-    char *password = DATABASE_PASSWORD; /* set me first */
 
     conn = mysql_init(NULL);
     /* Connect to database */
-    if (!mysql_real_connect(conn, server,
-                            user, password, NULL, 0, NULL, 0)) {
+    if (!mysql_real_connect(conn, DATABASE_SERVER,
+                            DATABASE_USER, DATABASE_PASSWORD, NULL, 0, NULL, 0)) {
         finish_with_error(conn);
     }
 
