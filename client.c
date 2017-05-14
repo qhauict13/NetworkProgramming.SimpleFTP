@@ -270,32 +270,34 @@ Boolean service_handleCmd(const int a_socket, const String *ap_argv, const int a
         return remote_exec(a_socket, &msgOut);
     } else if (strcmp(ap_argv[0], "get") == 0 && a_argc > 1) {
         char dstPath[PATH_MAX + 1];
-        String src, dst;
-
+        String dst;
+        int offset = 1;
         // init vars
-        src = ap_argv[1];
-        dst = (a_argc > 2) ? ap_argv[2] : src;
+        // src = ap_argv[1];
+        for (offset = 1; offset < a_argc; offset++)
+        {
+            dst = ap_argv[offset];
 
-        // build command with param='get remote-path'
-        Message_setType(&msgOut, SIFTP_VERBS_COMMAND);
-        Message_setValue(&msgOut, ap_argv[0]);
-        strcat(Message_getValue(&msgOut), " ");
-        strcat(Message_getValue(&msgOut), src);
+            // build command with param='get remote-path'
+            Message_setType(&msgOut, SIFTP_VERBS_COMMAND);
+            Message_setValue(&msgOut, ap_argv[0]);
+            strcat(Message_getValue(&msgOut), " ");
+            strcat(Message_getValue(&msgOut), dst);
 
-        // determine destination file path
-        if (service_getAbsolutePath(g_pwd, dst, dstPath)) {
-            // check write perms & file type
-            if (service_permTest(dstPath, SERVICE_PERMS_WRITE_TEST) && service_statTest(dstPath, S_IFMT, S_IFREG)) {
-                // perform command
-                if (remote_exec(a_socket, &msgOut)) {
-                    // receive destination file
-                    if ((dataBuf = siftp_recvData(a_socket, &dataBufLen)) != NULL) {
-                        // write file
-                        if ((tempStatus = service_writeFile(dstPath, dataBuf, dataBufLen))) {
-                            printf("%d bytes transferred.", dataBufLen);
-                        }
+            // determine destination file path
+            if (service_getAbsolutePath(g_pwd, dst, dstPath)) {
+                // check write perms & file type
+                if (service_permTest(dstPath, SERVICE_PERMS_WRITE_TEST) && service_statTest(dstPath, S_IFMT, S_IFREG)) {
+                    // perform command
+                    if (remote_exec(a_socket, &msgOut)) {
+                        // receive destination file
+                        if ((dataBuf = siftp_recvData(a_socket, &dataBufLen)) != NULL) {
+                            // write file
+                            if ((tempStatus = service_writeFile(dstPath, dataBuf, dataBufLen))) {
+                                printf("%d bytes transferred.", dataBufLen);
+                            }
 
-                        free(dataBuf);
+                            free(dataBuf);
 
 #ifndef NODEBUG
                         printf("get(): file writing %s.\n", tempStatus ? "OK" : "FAILED");
@@ -320,39 +322,41 @@ Boolean service_handleCmd(const int a_socket, const String *ap_argv, const int a
         else
             printf("get(): absolute path determining failed.\n");
 #endif
-
+        };
         return tempStatus;
     } else if (strcmp(ap_argv[0], "put") == 0 && a_argc > 1) {
         char srcPath[PATH_MAX + 1];
-        String src, dst;
-
+        String dst;
+        int offset = 1;
         // init vars
-        src = ap_argv[1];
-        dst = (a_argc > 2) ? ap_argv[2] : src;
+        // src = ap_argv[1];
+        for (offset = 1; offset < a_argc; offset++)
+        {
+            dst = ap_argv[offset];
 
-        // build command with param='put remote-path'
-        Message_setType(&msgOut, SIFTP_VERBS_COMMAND);
-        Message_setValue(&msgOut, ap_argv[0]);
-        strcat(Message_getValue(&msgOut), " ");
-        strcat(Message_getValue(&msgOut), dst);
+            // build command with param='put remote-path'
+            Message_setType(&msgOut, SIFTP_VERBS_COMMAND);
+            Message_setValue(&msgOut, ap_argv[0]);
+            strcat(Message_getValue(&msgOut), " ");
+            strcat(Message_getValue(&msgOut), dst);
 
-        // determine source path
-        if (service_getAbsolutePath(g_pwd, src, srcPath)) {
-            // check read perms & file type
-            if (service_permTest(srcPath, SERVICE_PERMS_READ_TEST) && service_statTest(srcPath, S_IFMT, S_IFREG)) {
-                // try to read source file
-                if ((dataBuf = service_readFile(srcPath, &dataBufLen)) != NULL) {
-                    // client: i'm sending a file
-                    if (remote_exec(a_socket, &msgOut)) {
-                        // server: OK to send file
+            // determine source path
+            if (service_getAbsolutePath(g_pwd, dst, srcPath)) {
+                // check read perms & file type
+                if (service_permTest(srcPath, SERVICE_PERMS_READ_TEST) && service_statTest(srcPath, S_IFMT, S_IFREG)) {
+                    // try to read source file
+                    if ((dataBuf = service_readFile(srcPath, &dataBufLen)) != NULL) {
+                        // client: i'm sending a file
+                        if (remote_exec(a_socket, &msgOut)) {
+                            // server: OK to send file
 
-                        // client: here is the file
-                        if ((tempStatus = (siftp_sendData(a_socket, dataBuf, dataBufLen) &&
-                                           service_recvStatus(a_socket)))) {
-                            // server: success
+                            // client: here is the file
+                            if ((tempStatus = (siftp_sendData(a_socket, dataBuf, dataBufLen) &&
+                                               service_recvStatus(a_socket)))) {
+                                // server: success
 
-                            printf("%d bytes transferred.", dataBufLen);
-                        }
+                                printf("%d bytes transferred.", dataBufLen);
+                            }
 
 #ifndef NODEBUG
                         printf("put(): file sent %s.\n", tempStatus ? "OK" : "FAILED");
@@ -379,7 +383,7 @@ Boolean service_handleCmd(const int a_socket, const String *ap_argv, const int a
         else
             printf("put(): absolute path determining failed.\n");
 #endif
-
+        }
         return tempStatus;
     }
 
