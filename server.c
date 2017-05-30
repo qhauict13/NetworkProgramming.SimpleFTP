@@ -1,10 +1,3 @@
-/**
- * Suraj Kurapati <skurapat@ucsc.edu>
- * CMPS-150, Spring04, final project
- *
- * SimpleFTP server implementation.
-**/
-
 #include "service.h"
 #include "server.h"
 
@@ -25,7 +18,6 @@
 #include <netdb.h>
 
 #include <mysql/mysql.h>
-//#include <my_global.h>
 
 // globals
 char g_pwd[PATH_MAX];
@@ -78,9 +70,6 @@ MYSQL_ROW check_database(char *check_string, int offset) {
     
     res = mysql_use_result(conn);
     while ((row = mysql_fetch_row(res)) != NULL) {
-        // printf("%s\n", check_string);
-        // printf("%s\n", row[offset]);
-
         if (!strcmp(row[offset], check_string)) {
             return row;
         }
@@ -129,15 +118,7 @@ int main(int a_argc, char **ap_argv) {
 
         // wait for a client
 
-#ifndef NODEBUG
-        printf("\nmain(): waiting for clients...\n");
-#endif
-
         if ((clientSocket = accept(serverSocket, (struct sockaddr *) &clientAddr, &clientAddrSize)) != -1) {
-#ifndef NODEBUG
-            printf("\nmain(): got client connection [addr=%s,port=%d]\n", inet_ntoa(clientAddr.sin_addr),
-                   ntohs(clientAddr.sin_port));
-#endif
 
             // dispatch job
             if ((childPID = fork()) == 0) // child code
@@ -154,10 +135,6 @@ int main(int a_argc, char **ap_argv) {
                 close(clientSocket);
                 return 0;
             }
-
-#ifndef NODEBUG
-            printf("\nmain(): forked a child; pid=%d\n", childPID);
-#endif
 
             close(clientSocket); // parent doesn't need this socket
         } else
@@ -223,8 +200,6 @@ Boolean session_create(const int a_socket) {
     Message_clear(&msgOut);
     Message_clear(&msgIn);
 
-    // session challenge dialogue
-
     // client: greeting
     if (!siftp_recv(a_socket, &msgIn) || !Message_hasType(&msgIn, SIFTP_VERBS_SESSION_BEGIN)) {
         fprintf(stderr, "service_create(): session not requested by client.\n");
@@ -243,7 +218,6 @@ Boolean session_create(const int a_socket) {
     char *username = (&msgIn)->m_param;
 
     // server: accept|deny password
-//    if (Message_hasValue(&msgIn, SERVER_USERNAME)) {
     MYSQL_ROW row = check_database(username, 1);
 
     if (row != NULL) {
@@ -259,16 +233,15 @@ Boolean session_create(const int a_socket) {
 
     // server: accept|deny
     // client: password
-    // Message_setType(&msgOut, SIFTP_VERBS_ACCEPTED); //XXX check username... not required for this project
-
     if (!service_query(a_socket, &msgOut, &msgIn) || !Message_hasType(&msgIn, SIFTP_VERBS_PASSWORD)) {
         fprintf(stderr, "service_create(): password not specified by client.\n");
         return false;
     }
 
     char *password = (&msgIn)->m_param;
+
     // server: accept|deny
-//    if (Message_hasValue(&msgIn, SERVER_PASSWORD)) {
+
     if (!strcmp(password, row[2])) {
         Message_setType(&msgOut, SIFTP_VERBS_ACCEPTED);
         siftp_send(a_socket, &msgOut);
@@ -279,11 +252,6 @@ Boolean session_create(const int a_socket) {
         fprintf(stderr, "service_create(): client password rejected.\n");
         return false;
     }
-
-    // session now established
-#ifndef NODEBUG
-    printf("session_create(): success\n");
-#endif
 
     return true;
 }
@@ -304,9 +272,6 @@ void service_loop(const int a_socket) {
             break;
 
         else {
-#ifndef NODEBUG
-            printf("service_loop(): got command '%s'\n", Message_getValue(&msg));
-#endif
 
             // parse request
             if ((p_argv = service_parseArgs(Message_getValue(&msg), &argc)) == NULL || argc <= 0) {
@@ -326,18 +291,6 @@ void service_loop(const int a_socket) {
             service_freeArgs(p_argv, argc);
             p_argv = NULL;
 
-            /*
-            if(!service_handleCmd(a_socket, Message_getValue(&msg))) // send failure notification
-            {
-                Message_setType(&msg, SIFTP_VERBS_ABORT);
-
-                if(!siftp_send(a_socket, &msg))
-                {
-                    fprintf(stderr, "service_loop(): unable to send faliure notice.\n");
-                    break;
-                }
-            }
-            */
         }
     }
 }
@@ -362,10 +315,6 @@ Boolean service_handleCmd(const int a_socket, const String *ap_argv, const int a
             if (service_sendStatus(a_socket, true))
                 tempStatus = siftp_sendData(a_socket, dataBuf, dataBufLen);
 
-#ifndef NODEBUG
-            printf("ls(): status=%d\n", tempStatus);
-#endif
-
             // clean up
             free(dataBuf);
 
@@ -389,31 +338,14 @@ Boolean service_handleCmd(const int a_socket, const String *ap_argv, const int a
                         // send file
                         tempStatus = siftp_sendData(a_socket, dataBuf, dataBufLen);
 
-#ifndef NODEBUG
-                        printf("get(): file sent %s.\n", tempStatus ? "OK" : "FAILED");
-#endif
                     }
-#ifndef NODEBUG
-                    else
-                        printf("get(): remote host didn't get status ACK.\n");
-#endif
 
                     free(dataBuf);
                 }
-#ifndef NODEBUG
-                else
-                    printf("get(): file reading failed.\n");
-#endif
+
             }
-#ifndef NODEBUG
-            else
-                printf("get(): don't have read permissions.\n");
-#endif
+
         }
-#ifndef NODEBUG
-        else
-            printf("get(): absolute path determining failed.\n");
-#endif
 
         return tempStatus;
     } else if (strcmp(ap_argv[0], "put") == 0 && a_argc > 1) {
@@ -427,42 +359,19 @@ Boolean service_handleCmd(const int a_socket, const String *ap_argv, const int a
                 if (service_sendStatus(a_socket, true)) {
                     // receive file
                     if ((dataBuf = siftp_recvData(a_socket, &dataBufLen)) != NULL) {
-#ifndef NODEBUG
-                        printf("put(): about to write to file '%s'.\n", dstPath);
-#endif
 
                         tempStatus = service_writeFile(dstPath, dataBuf, dataBufLen);
 
                         free(dataBuf);
-
-#ifndef NODEBUG
-                        printf("put(): file writing %s.\n", tempStatus ? "OK" : "FAILED");
-#endif
 
                         // send secondary ack: file was written OK
                         if (tempStatus) {
                             return service_sendStatus(a_socket, true);
                         }
                     }
-#ifndef NODEBUG
-                    else
-                        printf("put(): getting of remote file failed.\n");
-#endif
                 }
-#ifndef NODEBUG
-                else
-                    printf("put(): remote host didn't get status ACK.\n");
-#endif
             }
-#ifndef NODEBUG
-            else
-                printf("put(): don't have write permissions.\n");
-#endif
         }
-#ifndef NODEBUG
-        else
-            printf("put(): absolute path determining failed.\n");
-#endif
     }
 
     return false;

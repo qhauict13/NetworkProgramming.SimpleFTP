@@ -29,18 +29,6 @@ MYSQL* connect_database() {
     {
         finish_with_error(conn);
     }
-
-    // if (mysql_query(conn, "SELECT * FROM users")) {
-    //     finish_with_error(conn);
-    // }
-    
-    // res = mysql_use_result(conn);
-    // while ((row = mysql_fetch_row(res)) != NULL) {
-    //     // printf("%s\n", check_string);
-    //     printf("%s\n", row[1]);
-    // }
-    // /* close connection */
-    // mysql_free_result(res);
     return conn;
 }
 

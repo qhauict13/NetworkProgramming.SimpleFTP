@@ -1,10 +1,3 @@
-/**
- * Suraj Kurapati <skurapat@ucsc.edu>
- * CMPS-150, Spring04, final project
- *
- * SimpleFTP client interface.
-**/
-
 #include "service.h"
 #include "client.h"
 
@@ -82,11 +75,6 @@ Boolean service_create(int *ap_socket, const String a_serverName, const int a_se
         return false;
     }
 
-#ifndef NODEBUG
-    printf("service_create(): serverName='%s', serverAddr='%s'\n", a_serverName,
-           inet_ntoa(*((struct in_addr *) p_serverInfo->h_addr)));
-#endif
-
     serverAddr.sin_addr.s_addr = inet_addr(inet_ntoa(*((struct in_addr *) p_serverInfo->h_addr)));
 
     serverAddr.sin_family = AF_INET;
@@ -115,8 +103,6 @@ Boolean session_create(const int a_socket) {
     // init vars
     Message_clear(&msgOut);
     Message_clear(&msgIn);
-
-    // session challenge dialogue
 
     // cilent: greeting
     // server: identify
@@ -154,11 +140,6 @@ Boolean session_create(const int a_socket) {
         return false;
     }
 
-    // session now established
-#ifndef NODEBUG
-    printf("session_create(): success\n");
-#endif
-
     return true;
 }
 
@@ -180,10 +161,6 @@ void service_loop(const int a_socket) {
         // remove newline
         if ((bufCR = strrchr(buf, '\n')) != NULL)
             *bufCR = '\0';
-
-#ifndef NODEBUG
-        printf("service_loop(): got command '%s'\n", buf);
-#endif
 
         // handle commands
         status = true;
@@ -298,30 +275,10 @@ Boolean service_handleCmd(const int a_socket, const String *ap_argv, const int a
                             }
 
                             free(dataBuf);
-
-#ifndef NODEBUG
-                        printf("get(): file writing %s.\n", tempStatus ? "OK" : "FAILED");
-#endif
+                        }
                     }
-#ifndef NODEBUG
-                    else
-                        printf("get(): getting of remote file failed.\n");
-#endif
                 }
-#ifndef NODEBUG
-                else
-                    printf("get(): server gave negative ACK.\n");
-#endif
             }
-#ifndef NODEBUG
-            else
-                printf("get(): don't have write permissions.\n");
-#endif
-        }
-#ifndef NODEBUG
-        else
-            printf("get(): absolute path determining failed.\n");
-#endif
         };
         return tempStatus;
     } else if (strcmp(ap_argv[0], "put") == 0 && a_argc > 1) {
@@ -357,32 +314,11 @@ Boolean service_handleCmd(const int a_socket, const String *ap_argv, const int a
 
                                 printf("%d bytes transferred.", dataBufLen);
                             }
-
-#ifndef NODEBUG
-                        printf("put(): file sent %s.\n", tempStatus ? "OK" : "FAILED");
-#endif
+                        }
+                        free(dataBuf);
                     }
-#ifndef NODEBUG
-                    else
-                        printf("put(): server gave negative ACK.\n");
-#endif
-
-                    free(dataBuf);
                 }
-#ifndef NODEBUG
-                else
-                    printf("put(): file reading failed.\n");
-#endif
             }
-#ifndef NODEBUG
-            else
-                printf("put(): don't have read permissions.\n");
-#endif
-        }
-#ifndef NODEBUG
-        else
-            printf("put(): absolute path determining failed.\n");
-#endif
         }
         return tempStatus;
     }

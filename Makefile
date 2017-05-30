@@ -1,6 +1,6 @@
 # compiler
 CC=gcc
-CFLAGS=-Wall -g -DNODEBUG
+CFLAGS=-Wall -g
 MYSQL_CONFIG = mysql_config
 INCLUDES = ${shell $(MYSQL_CONFIG) --cflags}
 LIBS = ${shell $(MYSQL_CONFIG) --libs}
