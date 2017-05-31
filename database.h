@@ -4,6 +4,11 @@
 #include "server.h"
 #include <mysql/mysql.h>
 
-	MYSQL* connect_database();
+	/* services */
+	
+		/**
+		 * Establishes a connection to database
+		 */
+		MYSQL* connect_database();
 
 #endif
